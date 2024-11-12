@@ -1,0 +1,64 @@
+getting used to r
+
+grades<-c(85,90,78,92,88,76,95,89,84,91)
+mean<-mean(grades)
+cat("mean of grades:",mean,"\n")
+median<-median(grades)
+cat("median of grades:",median,"\n")
+sd_grade<-sd(grades)
+cat("standard deviation of grades:",sd_grade,"\n")
+summary<- summary(grades)
+cat("summary of grades",summary,"\n")
+
+-----------------------------------------------------------------------------------------------------
+
+creating and displaying data
+
+emp_names<- c("logi","gokul","sankar","jai","dharani")
+emp_ages<- c(21,22,23,24,25)
+emp_salary<- c(100000,50000,30000,20000,70000)
+emp_data<- data.frame(name=emp_names,age=emp_ages,salary=emp_salary)
+print("Employee Data")
+print(emp_data)
+
+-----------------------------------------------------------------------------------------------------
+creating and manipulating list and array
+
+stu_list<- list("logi"="A","gokul"="A+","jai"="B")
+cat("original List:\n")
+print(stu_list)
+stu_list$sankar<-"A"
+cat("after insert data \n")
+print(stu_list)
+stu_list$jai<-NULL
+cat("After removing \n")
+print(stu_list)
+stu_list$logi<-"A+"
+cat("after updating \n")
+print(stu_list)
+
+
+
+stu_score<- array(c(85,95,90,92,91,90,87,98,79),dim=c(3,3),dimnames=list(c("logi","gokul","jai"),c("Math","science","english")))
+cat("original array \n")
+print(stu_score)
+
+stu_score["logi","english"]<-97
+cat("After updation \n")
+print(stu_score)
+
+-------------------------------------------------------------------------------------------------------
+
+string manipulation
+
+customer_data<- data.frame(Name=c("logi","gokul","sankar"),
+Email=c("logi@gamil.com","gokul@gamil.net","sankar@gamil.org"))
+customer_data$Name_upper<-toupper(customer_data$Name)
+customer_data$Domain<-sub(".*@","",customer_data$Email)
+print(customer_data)
+
+-------------------------------------------------------------------------------------------------------
+
+data transpose operation in r
+
+
