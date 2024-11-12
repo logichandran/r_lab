@@ -58,7 +58,41 @@ customer_data$Domain<-sub(".*@","",customer_data$Email)
 print(customer_data)
 
 -------------------------------------------------------------------------------------------------------
+probability distribution
 
-data transpose operation in r
+mean<-0
+sd<-1
+random_data<-rnorm(n=1000,mean=mean,sd=sd)
+print("summary statistics:")
+summary(random_data)
+
+hist(random_data,breaks=30,probabilty=TRUE,main="Normal Distribution(mean=0,sd=1)",xlab="Value",col="lightblue")
+curve(dnorm(x,mean=mean,sd=sd),col="darkblue",lwd=2,add=TRUE)
+-------------------------------------------------------------------------------------------------------
+data transpose
+
+data<- data.frame(name=c("logi","gokul","sankar"),
+age=c(21,20,20),height=c(5.5,5.4,5.3))
+print("original dataset:")
+print(data)
+t_data<- t(data)
+t_dataframe<-as.data.frame(t_data)
+print("Transposed data")
+print(t_dataframe)
+
+---------------------------------------------------------------------------------------
+
+basic statistics
+
+height<-c(150,160,165,168,170)
+mean_height<-mean(height)
+cat("mean of heigth",mean_height,"\n")
+median<-median(height)
+cat("median of height",median,"\n")
+sd<-sd(height)
+cat("standard Deviation of heigth",sd,"\n")
+weight<-c(70,72,75,77,80)
+corelation<-cor(height,weight)
+cat("corelation between height and weight",corelation,"\n")
 
 
