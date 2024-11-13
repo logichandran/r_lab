@@ -1,98 +1,206 @@
-getting used to r
+GMM MODEL
 
-grades<-c(85,90,78,92,88,76,95,89,84,91)
-mean<-mean(grades)
-cat("mean of grades:",mean,"\n")
-median<-median(grades)
-cat("median of grades:",median,"\n")
-sd_grade<-sd(grades)
-cat("standard deviation of grades:",sd_grade,"\n")
-summary<- summary(grades)
-cat("summary of grades",summary,"\n")
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.mixture import GaussianMixture
+iris=datasets.load_iris()
+X=iris.data[:,:2]
+d=pd.DataFrame(X,columns=['Feature1','Feature2'])
+plt.figure(figsize=(8,6))
+plt.scatter(d['Feature1'],d['Feature2'],color="gray",label="data points")
+gmm=GaussianMixture(n_components=3,random_state=42,max_iter=100)
+gmm.fit(d)
+labels=gmm.predict(d)
+d['labels']=labels
+d0=d[d['labels']==0]
+d1=d[d['labels']==1]
+d2=d[d['labels']==2]
+plt.scatter(d0['Feature1'],d0['Feature2'],color="red",label="Cluster 1")
+plt.scatter(d1['Feature1'],d1['Feature2'],color="yellow",label="Cluster 2")
+plt.scatter(d2['Feature1'],d2['Feature2'],color="green",label="Cluster 3")
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.show()
 
------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------
 
-creating and displaying data
+linear regression
 
-emp_names<- c("logi","gokul","sankar","jai","dharani")
-emp_ages<- c(21,22,23,24,25)
-emp_salary<- c(100000,50000,30000,20000,70000)
-emp_data<- data.frame(name=emp_names,age=emp_ages,salary=emp_salary)
-print("Employee Data")
-print(emp_data)
+x = [0, 1, 2, 3, 4]
+y = [2, 3, 5, 4, 6]
+N = len(x)
+sum_x = sum(x)
+sum_y = sum(y)
+sum_x_squared = sum([xi ** 2 for xi in x])
+sum_xy = sum([x[i] * y[i] for i in range(N)])
+a = (N * sum_xy - sum_x * sum_y) / (N * sum_x_squared - sum_x ** 2)
+b = (sum_y - a * sum_x) / N
+print(f"The regression line is: y = {a:.2f}x + {b:.2f}")
+x_new = 10
+y_estimated = a * x_new + b
+print(f"Estimated value of y when x = 10: {y_estimated:.2f}")
+y_pred = [a * xi + b for xi in x]
+mse = sum([(y_pred[i] - y[i]) ** 2 for i in range(N)]) / N
+print(f"Mean Squared Error: {mse:.2f}")
 
------------------------------------------------------------------------------------------------------
-creating and manipulating list and array
+-------------------------------------------------------------------------------------------------------------------------------
 
-stu_list<- list("logi"="A","gokul"="A+","jai"="B")
-cat("original List:\n")
-print(stu_list)
-stu_list$sankar<-"A"
-cat("after insert data \n")
-print(stu_list)
-stu_list$jai<-NULL
-cat("After removing \n")
-print(stu_list)
-stu_list$logi<-"A+"
-cat("after updating \n")
-print(stu_list)
+hypothesis s algorithm
 
+dataset = [
+    {"Sky": "Sunny", "AirTemp": "Warm", "Humidity": "Normal", "Wind": "Strong", "Water": "Warm", "Forecast": "Same", "EnjoySport": "Yes"},
+    {"Sky": "Sunny", "AirTemp": "Warm", "Humidity": "High", "Wind": "Strong", "Water": "Warm", "Forecast": "Same", "EnjoySport": "Yes"},
+    {"Sky": "Rainy", "AirTemp": "Cold", "Humidity": "High", "Wind": "Strong", "Water": "Warm", "Forecast": "Change", "EnjoySport": "No"},
+    {"Sky": "Sunny", "AirTemp": "Warm", "Humidity": "High", "Wind": "Strong", "Water": "Cool", "Forecast": "Change", "EnjoySport": "Yes"},
+]
+initial_positive_example = next(example for example in dataset if example["EnjoySport"] == "Yes")
+hypothesis = {key: value for key, value in initial_positive_example.items() if key != "EnjoySport"}
+for example in dataset:
+    if example["EnjoySport"] == "Yes":
+        for attribute, value in hypothesis.items():
+            if example[attribute] != value:
+                hypothesis[attribute] = "?"
+print("Maximally Specific Hypothesis:", hypothesis)
 
+---------------------------------------------------------------------------------------------------------------------------------------------
+KNN
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from collections import Counter
+data = {
+    'Height': [158, 158, 160, 160, 163, 163, 160, 163, 165, 165, 168, 168, 168, 170, 170, 170],
+    'Weight': [58, 59, 59, 20, 60, 61, 64, 54, 61, 62, 62, 63, 66, 63, 64, 58],
+    'TShirtSize': ['M', 'M', 'M', 'M', 'M', 'M', 'L', 'M', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L']}
+df = pd.DataFrame(data)
+tshirt_size_mapping = {'M': 0, 'L': 1}
+df['TShirtSize'] = df['TShirtSize'].map(tshirt_size_mapping)
+X = df[['Height', 'Weight']].values  # Features: Height and Weight
+y = df['TShirtSize'].values  # Target: T-shirt Size (encoded)
+train_size = int(len(X) * 0.8)
+X_train, X_test = X[:train_size], X[train_size:]
+y_train, y_test = y[:train_size], y[train_size:]
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+def knn_predict(X_train, y_train, X_test, k=3):
+    predictions = []
+    for test_point in X_test:
+        distances = []
+        for idx, train_point in enumerate(X_train):
+            distance = euclidean_distance(test_point, train_point)
+            distances.append((distance, y_train[idx]))
+        distances.sort(key=lambda x: x[0])
+        k_nearest_neighbors = distances[:k]
+        labels = [neighbor[1] for neighbor in k_nearest_neighbors]
+        majority_label = Counter(labels).most_common(1)[0][0]
+        predictions.append(majority_label)   
+    return np.array(predictions)
+new_customer = np.array([[167, 61]])  # New customer data
+predicted_size = knn_predict(X_train, y_train, new_customer, k=3)
+reverse_mapping = {0: 'M', 1: 'L'}
+predicted_size_label = reverse_mapping[predicted_size[0]]
+print("Predicted T-shirt size:", predicted_size_label)
+y_pred = knn_predict(X_test, y_test, X_test, k=3)
+accuracy = np.sum(y_pred == y_test) / len(y_test)
+print("Model Accuracy:", accuracy)
 
-stu_score<- array(c(85,95,90,92,91,90,87,98,79),dim=c(3,3),dimnames=list(c("logi","gokul","jai"),c("Math","science","english")))
-cat("original array \n")
-print(stu_score)
+---------------------------------------------------------------------------------------------------
 
-stu_score["logi","english"]<-97
-cat("After updation \n")
-print(stu_score)
+decision tree
 
--------------------------------------------------------------------------------------------------------
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
 
-string manipulation
+# Create the CSV file data
+data = {
+    'Day': ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14'],
+    'Outlook': ['Sunny', 'Sunny', 'Overcast', 'Rain', 'Rain', 'Rain', 'Overcast', 'Sunny', 'Sunny', 'Rain', 'Sunny', 'Overcast', 'Overcast', 'Rain'],
+    'Temperature': ['Hot', 'Hot', 'Hot', 'Mild', 'Cool', 'Cool', 'Cool', 'Mild', 'Cool', 'Mild', 'Mild', 'Mild', 'Hot', 'Mild'],
+    'Humidity': ['High', 'High', 'High', 'High', 'Normal', 'Normal', 'Normal', 'High', 'Normal', 'Normal', 'Normal', 'High', 'Normal', 'High'],
+    'Wind': ['Weak', 'Strong', 'Weak', 'Weak', 'Weak', 'Strong', 'Strong', 'Weak', 'Weak', 'Weak', 'Strong', 'Strong', 'Weak', 'Strong'],
+    'PlayTennis': ['No', 'No', 'Yes', 'Yes', 'Yes', 'No', 'Yes', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'No']
+}
+df = pd.DataFrame(data)
+df.to_csv('decision.csv', index=False)
 
-customer_data<- data.frame(Name=c("logi","gokul","sankar"),
-Email=c("logi@gamil.com","gokul@gamil.net","sankar@gamil.org"))
-customer_data$Name_upper<-toupper(customer_data$Name)
-customer_data$Domain<-sub(".*@","",customer_data$Email)
-print(customer_data)
+# Load the data
+df = pd.read_csv('decision.csv')
 
--------------------------------------------------------------------------------------------------------
-probability distribution
+# Encode categorical features
+label_encoders = {}
+for column in ['Outlook', 'Temperature', 'Humidity', 'Wind', 'PlayTennis']:
+    le = LabelEncoder()
+    df[column] = le.fit_transform(df[column])
+    label_encoders[column] = le  # Save label encoder for potential future decoding
 
-mean<-0
-sd<-1
-random_data<-rnorm(n=1000,mean=mean,sd=sd)
-print("summary statistics:")
-summary(random_data)
+# Separate features and target
+X = df[['Outlook', 'Temperature', 'Humidity', 'Wind']]
+y = df['PlayTennis']
 
-hist(random_data,breaks=30,probabilty=TRUE,main="Normal Distribution(mean=0,sd=1)",xlab="Value",col="lightblue")
-curve(dnorm(x,mean=mean,sd=sd),col="darkblue",lwd=2,add=TRUE)
--------------------------------------------------------------------------------------------------------
-data transpose
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
 
-data<- data.frame(name=c("logi","gokul","sankar"),
-age=c(21,20,20),height=c(5.5,5.4,5.3))
-print("original dataset:")
-print(data)
-t_data<- t(data)
-t_dataframe<-as.data.frame(t_data)
-print("Transposed data")
-print(t_dataframe)
+# Train the Decision Tree model
+clf = DecisionTreeClassifier(criterion="entropy")
+clf.fit(X_train, y_train)
 
----------------------------------------------------------------------------------------
+# Plot the decision tree
+plt.figure(figsize=(12, 8))
+plot_tree(clf, feature_names=['Outlook', 'Temperature', 'Humidity', 'Wind'], class_names=label_encoders['PlayTennis'].classes_, filled=True)
+plt.show()
 
-basic statistics
+# Predict and calculate accuracy
+y_pred = clf.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print("Model Accuracy:", accuracy)
 
-height<-c(150,160,165,168,170)
-mean_height<-mean(height)
-cat("mean of heigth",mean_height,"\n")
-median<-median(height)
-cat("median of height",median,"\n")
-sd<-sd(height)
-cat("standard Deviation of heigth",sd,"\n")
-weight<-c(70,72,75,77,80)
-corelation<-cor(height,weight)
-cat("corelation between height and weight",corelation,"\n")
+------------------------------------------------------------------------------------------------------------------
+SVM
 
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+X = np.array([1, 5, 1.5, 8, 1, 9, 7, 8.7, 2.3, 5.5, 7.7, 6.1])
+Y = np.array([2, 8, 1.8, 8, 0.6, 11, 10, 9.4, 4, 3, 8.8, 7.5])
+
+labels = np.array([0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1])
+
+data_points = np.column_stack((X, Y))
+
+model = SVC(kernel='linear', C=1.0)
+model.fit(data_points, labels)
+
+w = model.coef_[0]
+b = model.intercept_[0]
+
+slope = -w[0] / w[1]
+intercept = -b / w[1]
+
+x_vals = np.linspace(min(X) - 1, max(X) + 1, 100)
+y_vals = slope * x_vals + intercept
+
+margin = 1 / np.sqrt(np.sum(w ** 2))
+y_vals_margin_pos = y_vals + margin
+y_vals_margin_neg = y_vals - margin
+
+plt.figure(figsize=(10, 6))
+plt.scatter(X[labels == 0], Y[labels == 0], color='blue', label='Class 0')
+plt.scatter(X[labels == 1], Y[labels == 1], color='red', label='Class 1')
+plt.plot(x_vals, y_vals, 'k-', label='Optimal Hyperplane')
+plt.plot(x_vals, y_vals_margin_pos, 'g--', label='Margin Plane (+)')
+plt.plot(x_vals, y_vals_margin_neg, 'g--', label='Margin Plane (-)')
+plt.legend()
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.title("SVM Model with Optimal Hyperplane and Marginal Planes")
+plt.grid(True)
+plt.show()
+
+-----------------------------------------------------------------------------------------------------------------
 
