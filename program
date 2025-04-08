@@ -1,206 +1,184 @@
-GMM MODEL
+def edit_min_dis(s1, s2):
+  n = len(s1)
+  m = len(s2)
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn import datasets
-from sklearn.mixture import GaussianMixture
-iris=datasets.load_iris()
-X=iris.data[:,:2]
-d=pd.DataFrame(X,columns=['Feature1','Feature2'])
-plt.figure(figsize=(8,6))
-plt.scatter(d['Feature1'],d['Feature2'],color="gray",label="data points")
-gmm=GaussianMixture(n_components=3,random_state=42,max_iter=100)
-gmm.fit(d)
-labels=gmm.predict(d)
-d['labels']=labels
-d0=d[d['labels']==0]
-d1=d[d['labels']==1]
-d2=d[d['labels']==2]
-plt.scatter(d0['Feature1'],d0['Feature2'],color="red",label="Cluster 1")
-plt.scatter(d1['Feature1'],d1['Feature2'],color="yellow",label="Cluster 2")
-plt.scatter(d2['Feature1'],d2['Feature2'],color="green",label="Cluster 3")
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
-plt.show()
+  dp = [[0 for _ in range(n+1)] for _ in range(m+1)]
 
+  for j in range(m+1):
+    dp[0][j] = j
+  
+  for i in range(n+1):
+    dp[i][0] = i
+
+  for i in range(1,n+1):
+    for j in range(1,m+1):
+      if s1[i-1] == s2[j-1]:
+        dp[i][j] = dp[i-1][j-1]
+      else:
+        dp[i][j] = 1 + min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])
+  
+  return dp[n][m]
+
+print(edit_min_dis("intention","execution"))
 -------------------------------------------------------------------------------------------------------------------------------
 
-linear regression
+def stemming(s):
+  if s.endswith('ing'):
+    return s[0:-3]
+  if s.endswith('ly') or s.endswith('ed'):
+    return s[0:-2]
+  return s
 
-x = [0, 1, 2, 3, 4]
-y = [2, 3, 5, 4, 6]
-N = len(x)
-sum_x = sum(x)
-sum_y = sum(y)
-sum_x_squared = sum([xi ** 2 for xi in x])
-sum_xy = sum([x[i] * y[i] for i in range(N)])
-a = (N * sum_xy - sum_x * sum_y) / (N * sum_x_squared - sum_x ** 2)
-b = (sum_y - a * sum_x) / N
-print(f"The regression line is: y = {a:.2f}x + {b:.2f}")
-x_new = 10
-y_estimated = a * x_new + b
-print(f"Estimated value of y when x = 10: {y_estimated:.2f}")
-y_pred = [a * xi + b for xi in x]
-mse = sum([(y_pred[i] - y[i]) ** 2 for i in range(N)]) / N
-print(f"Mean Squared Error: {mse:.2f}")
+def lemming(s):
+  lemmas = {
+      'programming' : 'program' ,
+      'loving' : 'Love' ,
+      'lovely' : 'Love' ,
+      'kind' : 'kind'
+  }
+  return lemmas.get(s.lower(),s)
+
+for word in ['programming','loving','lovely','kind']:
+  print(lemming(word))
+  print(stemming(word))
 
 -------------------------------------------------------------------------------------------------------------------------------
+import re
 
-hypothesis s algorithm
+text = """
+Emails: sunil123@gmail.com, shyam.office@college.edu, contact_me@domain.org
+Phones: 9876543210, 9123456789
+"""
+names = ["Sunil", "Shyam", "Ankit", "Surjeet", "Sumit", "Subhi", "Surbhi", "Siddharth", "Sujan"]
+abc = "a ab abc abcc abccc abb abcd"
 
-dataset = [
-    {"Sky": "Sunny", "AirTemp": "Warm", "Humidity": "Normal", "Wind": "Strong", "Water": "Warm", "Forecast": "Same", "EnjoySport": "Yes"},
-    {"Sky": "Sunny", "AirTemp": "Warm", "Humidity": "High", "Wind": "Strong", "Water": "Warm", "Forecast": "Same", "EnjoySport": "Yes"},
-    {"Sky": "Rainy", "AirTemp": "Cold", "Humidity": "High", "Wind": "Strong", "Water": "Warm", "Forecast": "Change", "EnjoySport": "No"},
-    {"Sky": "Sunny", "AirTemp": "Warm", "Humidity": "High", "Wind": "Strong", "Water": "Cool", "Forecast": "Change", "EnjoySport": "Yes"},
-]
-initial_positive_example = next(example for example in dataset if example["EnjoySport"] == "Yes")
-hypothesis = {key: value for key, value in initial_positive_example.items() if key != "EnjoySport"}
-for example in dataset:
-    if example["EnjoySport"] == "Yes":
-        for attribute, value in hypothesis.items():
-            if example[attribute] != value:
-                hypothesis[attribute] = "?"
-print("Maximally Specific Hypothesis:", hypothesis)
+email_pattern = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b'
+phone_pattern = r'\b\d{10}\b'
+su_pattern = r'\bSu\w{3}\b'
+ab_pattern = r'ab(?:c)*'       # ab + 0 or more c's
+a_pattern = r'a(?:bc)*'        # a + 0 or more 'bc'
+an_pattern = r'ab(?:c)?'       # ab + 0 or 1 c
+
+
+print(re.findall(email_pattern,text))
+print(re.findall(phone_pattern,text))
+print(re.findall(su_pattern,str(names)))
+print(re.findall(ab_pattern,abc))
+print(re.findall(a_pattern,abc))
+print(re.findall(an_pattern,abc))
+
+found = re.search(phone_pattern,text)
+print(found.group() if found else "not found")
+
+matched = re.match(r'\nEmails' , text)
+print(matched.group() if matched else "not found")
+
+replaced = re.sub(phone_pattern , "xxxxxxxxxx" , text)
+print(replaced)
+
+email_complied = re.compile(email_pattern)
+print(email_complied.findall(text))
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
-KNN
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from collections import Counter
-data = {
-    'Height': [158, 158, 160, 160, 163, 163, 160, 163, 165, 165, 168, 168, 168, 170, 170, 170],
-    'Weight': [58, 59, 59, 20, 60, 61, 64, 54, 61, 62, 62, 63, 66, 63, 64, 58],
-    'TShirtSize': ['M', 'M', 'M', 'M', 'M', 'M', 'L', 'M', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L']}
-df = pd.DataFrame(data)
-tshirt_size_mapping = {'M': 0, 'L': 1}
-df['TShirtSize'] = df['TShirtSize'].map(tshirt_size_mapping)
-X = df[['Height', 'Weight']].values  # Features: Height and Weight
-y = df['TShirtSize'].values  # Target: T-shirt Size (encoded)
-train_size = int(len(X) * 0.8)
-X_train, X_test = X[:train_size], X[train_size:]
-y_train, y_test = y[:train_size], y[train_size:]
-def euclidean_distance(x1, x2):
-    return np.sqrt(np.sum((x1 - x2) ** 2))
-def knn_predict(X_train, y_train, X_test, k=3):
-    predictions = []
-    for test_point in X_test:
-        distances = []
-        for idx, train_point in enumerate(X_train):
-            distance = euclidean_distance(test_point, train_point)
-            distances.append((distance, y_train[idx]))
-        distances.sort(key=lambda x: x[0])
-        k_nearest_neighbors = distances[:k]
-        labels = [neighbor[1] for neighbor in k_nearest_neighbors]
-        majority_label = Counter(labels).most_common(1)[0][0]
-        predictions.append(majority_label)   
-    return np.array(predictions)
-new_customer = np.array([[167, 61]])  # New customer data
-predicted_size = knn_predict(X_train, y_train, new_customer, k=3)
-reverse_mapping = {0: 'M', 1: 'L'}
-predicted_size_label = reverse_mapping[predicted_size[0]]
-print("Predicted T-shirt size:", predicted_size_label)
-y_pred = knn_predict(X_test, y_test, X_test, k=3)
-accuracy = np.sum(y_pred == y_test) / len(y_test)
-print("Model Accuracy:", accuracy)
+from collections import defaultdict
+corpus = [
+    "<s> I am Henry </s>",
+    "<s> I like college </s>",
+    "<s> Do Henry like college </s>",
+    "<s> Henry I am </s>",
+    "<s> Do I like Henry </s>",
+    "<s> Do I like college </s>",
+    "<s> I do like Henry </s>"
+]
 
+trigram_counts = defaultdict(int)
+
+for sentence in corpus:
+  words = sentence.replace('<s>' , "").replace('</s>','').strip().split()
+  for i in range(len(words)-2):
+    trigram = (words[i],words[i+1],words[i+2])
+    trigram_counts[trigram] += 1
+
+next_word_count = defaultdict(int)
+for sentence in corpus:
+  words = sentence.replace('<s>' , "").replace('</s>','').strip().split()
+  for i in range(len(words)-3):
+    if words[i] == "Do" and words[i+1] == "I" and words[i+2] == "like":
+      next = words[i+3]
+      next_word_count[next] += 1
+
+print(max(next_word_count, key=next_word_count.get))
 ---------------------------------------------------------------------------------------------------
+sentences = [
+    "I need a flight from Atlanta.",
+    "Everything to permit us.",
+    "I would like to address the public on this issue.",
+    "We need your shipping address."
+]
 
-decision tree
 
-import pandas as pd
-from sklearn.tree import DecisionTreeClassifier, plot_tree
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
-
-# Create the CSV file data
-data = {
-    'Day': ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14'],
-    'Outlook': ['Sunny', 'Sunny', 'Overcast', 'Rain', 'Rain', 'Rain', 'Overcast', 'Sunny', 'Sunny', 'Rain', 'Sunny', 'Overcast', 'Overcast', 'Rain'],
-    'Temperature': ['Hot', 'Hot', 'Hot', 'Mild', 'Cool', 'Cool', 'Cool', 'Mild', 'Cool', 'Mild', 'Mild', 'Mild', 'Hot', 'Mild'],
-    'Humidity': ['High', 'High', 'High', 'High', 'Normal', 'Normal', 'Normal', 'High', 'Normal', 'Normal', 'Normal', 'High', 'Normal', 'High'],
-    'Wind': ['Weak', 'Strong', 'Weak', 'Weak', 'Weak', 'Strong', 'Strong', 'Weak', 'Weak', 'Weak', 'Strong', 'Strong', 'Weak', 'Strong'],
-    'PlayTennis': ['No', 'No', 'Yes', 'Yes', 'Yes', 'No', 'Yes', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'No']
-}
-df = pd.DataFrame(data)
-df.to_csv('decision.csv', index=False)
-
-# Load the data
-df = pd.read_csv('decision.csv')
-
-# Encode categorical features
-label_encoders = {}
-for column in ['Outlook', 'Temperature', 'Humidity', 'Wind', 'PlayTennis']:
-    le = LabelEncoder()
-    df[column] = le.fit_transform(df[column])
-    label_encoders[column] = le  # Save label encoder for potential future decoding
-
-# Separate features and target
-X = df[['Outlook', 'Temperature', 'Humidity', 'Wind']]
-y = df['PlayTennis']
-
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
-
-# Train the Decision Tree model
-clf = DecisionTreeClassifier(criterion="entropy")
-clf.fit(X_train, y_train)
-
-# Plot the decision tree
-plt.figure(figsize=(12, 8))
-plot_tree(clf, feature_names=['Outlook', 'Temperature', 'Humidity', 'Wind'], class_names=label_encoders['PlayTennis'].classes_, filled=True)
-plt.show()
-
-# Predict and calculate accuracy
-y_pred = clf.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-print("Model Accuracy:", accuracy)
+for sentence in sentences:
+  words = sentence.strip().split()
+  for word in words:
+    w = word.lower()
+    if w in ['i' ,'us','we','your']:
+      print(f'{w} (PRP) ' , end=" ")
+    elif w in ['need' , 'permit' , 'would', 'like','shipping']:
+      print(f"{w} (VBP) " , end= " ")
+    elif w in ['a','the', 'this']:
+      print(f'{w}  (DT) ', end= " ")
+    elif w in ["to"]:
+      print(f'{w} (TO) ', end= " ")
+    elif w in ['flight' , 'atlanta' , 'everything' ,'address','public','issue']:
+      print(f'{w} (NN) ' , end = " ")
+    elif w in ['from' , 'in' , 'on']:
+      print(f'{w} (IN) ' , end = " ")
+  print()
 
 ------------------------------------------------------------------------------------------------------------------
-SVM
+text = """
+Artificial Intelligence (AI) has significantly transformed how we interact with technology.
+From voice assistants like Siri and Alexa to recommendation systems on Netflix and YouTube, AI is all around us.
+It enables machines to learn from data and improve over time without being explicitly programmed.
+In healthcare, AI is helping doctors diagnose diseases more accurately and quickly.
+In transportation, self-driving cars use AI to navigate and avoid obstacles.
+Businesses use AI to automate repetitive tasks and gain insights from large datasets.
+In education, AI-powered tutors assist students with personalized learning.
+However, AI also poses ethical challenges such as job displacement, data privacy, and algorithmic bias.
+As AI continues to evolve, it's important for society to strike a balance between innovation and regulation.
+Responsible development and use of AI will shape the future of technology and humanity.
+"""
 
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.svm import SVC
-X = np.array([1, 5, 1.5, 8, 1, 9, 7, 8.7, 2.3, 5.5, 7.7, 6.1])
-Y = np.array([2, 8, 1.8, 8, 0.6, 11, 10, 9.4, 4, 3, 8.8, 7.5])
+import re
+from collections import Counter
 
-labels = np.array([0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1])
+# Clean and split text into sentences
+sentences = [s.strip() for s in re.split(r'[.!?]', text) if s.strip()]
 
-data_points = np.column_stack((X, Y))
+# Tokenize words
+words = re.findall(r'\b\w+\b', text.lower())
+stopwords = set(["the", "is", "has", "a", "and", "to", "of", "in", "with", "for", "on", "as", "it", "we", "how", "from", "be", "are", "by", "this", "that", "such", "will"])
 
-model = SVC(kernel='linear', C=1.0)
-model.fit(data_points, labels)
+# Filter stopwords
+filtered_words = [word for word in words if word not in stopwords]
 
-w = model.coef_[0]
-b = model.intercept_[0]
+# Word frequency
+word_freq = Counter(filtered_words)
 
-slope = -w[0] / w[1]
-intercept = -b / w[1]
+# Score sentences
+sentence_scores = {}
+for sent in sentences:
+    score = 0
+    for word in re.findall(r'\b\w+\b', sent.lower()):
+        if word in word_freq:
+            score += word_freq[word]
+    sentence_scores[sent] = score
 
-x_vals = np.linspace(min(X) - 1, max(X) + 1, 100)
-y_vals = slope * x_vals + intercept
+# Top 3 sentences
+top_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:3]
+extractive_summary = '. '.join(top_sentences) + '.'
 
-margin = 1 / np.sqrt(np.sum(w ** 2))
-y_vals_margin_pos = y_vals + margin
-y_vals_margin_neg = y_vals - margin
-
-plt.figure(figsize=(10, 6))
-plt.scatter(X[labels == 0], Y[labels == 0], color='blue', label='Class 0')
-plt.scatter(X[labels == 1], Y[labels == 1], color='red', label='Class 1')
-plt.plot(x_vals, y_vals, 'k-', label='Optimal Hyperplane')
-plt.plot(x_vals, y_vals_margin_pos, 'g--', label='Margin Plane (+)')
-plt.plot(x_vals, y_vals_margin_neg, 'g--', label='Margin Plane (-)')
-plt.legend()
-plt.xlabel("X")
-plt.ylabel("Y")
-plt.title("SVM Model with Optimal Hyperplane and Marginal Planes")
-plt.grid(True)
-plt.show()
+print("📌 Extractive Summary:\n", extractive_summary)
 
 -----------------------------------------------------------------------------------------------------------------
 
